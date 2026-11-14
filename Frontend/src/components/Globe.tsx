@@ -1,4 +1,3 @@
-
 import { useEffect, useRef, useState } from 'react'
 import type { CSSProperties } from 'react'
 
@@ -18,10 +17,6 @@ import {
 } from 'cesium'
 
 import 'cesium/Build/Cesium/Widgets/widgets.css'
-
-// --------------------------------------------------
-// Types
-// --------------------------------------------------
 
 export type ParcelGeoJSON = {
   type: 'Feature'
@@ -48,17 +43,13 @@ type DrawingControls = {
   clear: () => void
 }
 
-// --------------------------------------------------
-// Colors
-// --------------------------------------------------
-
 const DRAW_COLOR = Color.fromCssColorString('#22d3ee')
 const COMPLETE_COLOR = Color.fromCssColorString('#34d399')
 const PREVIEW_COLOR = Color.fromCssColorString('#fbbf24')
 
-// --------------------------------------------------
-// Helper functions
-// --------------------------------------------------
+// Practical zoom limit to reduce excessive image enlargement.
+// Image resolution still depends on the selected geographic area.
+const MIN_ZOOM_DISTANCE_METERS = 300
 
 function createRectangleCorners(
   first: Cartesian3,
@@ -72,7 +63,6 @@ function createRectangleCorners(
   const south = Math.min(a.latitude, b.latitude)
   const north = Math.max(a.latitude, b.latitude)
 
-  // Reject rectangles that are too small to be useful.
   if (
     Math.abs(east - west) < 1e-8 ||
     Math.abs(north - south) < 1e-8
@@ -91,22 +81,16 @@ function createRectangleCorners(
 function createParcelGeoJSON(
   positions: Cartesian3[]
 ): ParcelGeoJSON {
-  const ring: [number, number][] = positions.map(
-    (position) => {
-      const point = Cartographic.fromCartesian(position)
+  const ring: [number, number][] = positions.map((position) => {
+    const point = Cartographic.fromCartesian(position)
 
-      return [
-        Number(
-          CesiumMath.toDegrees(point.longitude).toFixed(7)
-        ),
-        Number(
-          CesiumMath.toDegrees(point.latitude).toFixed(7)
-        ),
-      ]
-    }
-  )
+    return [
+      Number(CesiumMath.toDegrees(point.longitude).toFixed(7)),
+      Number(CesiumMath.toDegrees(point.latitude).toFixed(7)),
+    ]
+  })
 
-  // GeoJSON polygons must have a closed coordinate ring.
+  // GeoJSON polygon rings must be closed.
   ring.push([...ring[0]])
 
   return {
@@ -121,10 +105,6 @@ function createParcelGeoJSON(
     },
   }
 }
-
-// --------------------------------------------------
-// Toolbar styles
-// --------------------------------------------------
 
 const buttonStyle: CSSProperties = {
   padding: '10px 12px',
@@ -149,10 +129,6 @@ const successButtonStyle: CSSProperties = {
   background: '#087f5b',
   borderColor: '#087f5b',
 }
-
-// --------------------------------------------------
-// Globe component
-// --------------------------------------------------
 
 export default function Globe({
   onParcelSelect,
@@ -183,10 +159,6 @@ export default function Globe({
     onParcelSelectRef.current = onParcelSelect
   }, [onParcelSelect])
 
-  // --------------------------------------------------
-  // Initialize Cesium
-  // --------------------------------------------------
-
   useEffect(() => {
     if (!containerRef.current) return
 
@@ -204,16 +176,39 @@ export default function Globe({
       infoBox: false,
       selectionIndicator: false,
       fullscreenButton: false,
+
+      // Render using the display's actual pixel density.
+      useBrowserRecommendedResolution: false,
     })
 
     viewerRef.current = viewer
-    viewer.resolutionScale = 1.5
 
-    viewer.scene.globe.show = true
-    viewer.scene.globe.baseColor =
-      Color.fromCssColorString('#285d91')
+    // Modest supersampling for the canvas.
+    // This does not increase the satellite image's native resolution.
+    viewer.resolutionScale = 1.25
 
-    viewer.scene.backgroundColor = Color.BLACK
+    const { scene } = viewer
+    const { globe, screenSpaceCameraController } = scene
+
+    // Lower values request finer levels of detail.
+    globe.maximumScreenSpaceError = 0.5
+
+    // Keep more tiles available while navigating.
+    globe.tileCacheSize = 512
+    globe.preloadSiblings = true
+    globe.preloadAncestors = true
+
+    globe.show = true
+    globe.baseColor = Color.fromCssColorString('#285d91')
+    scene.backgroundColor = Color.BLACK
+
+    // Avoid the severe overzoom previously allowed at 3 meters.
+    screenSpaceCameraController.minimumZoomDistance =
+      MIN_ZOOM_DISTANCE_METERS
+
+    // More controlled zoom near the surface.
+    screenSpaceCameraController.zoomFactor = 2
+    screenSpaceCameraController.inertiaZoom = 0.5
 
     viewer.camera.setView({
       destination: Cartesian3.fromDegrees(
@@ -223,21 +218,20 @@ export default function Globe({
       ),
     })
 
-    // Keep parcel entities separate from future NISAR layers.
     const parcelSource = new CustomDataSource('parcel-editor')
     void viewer.dataSources.add(parcelSource)
 
     const entities = parcelSource.entities
 
-    // --------------------------------------------------
-    // Satellite imagery
-    // --------------------------------------------------
-
     async function loadImagery() {
       try {
+        // Cesium reads the supported tile levels from service metadata.
         const provider =
           await ArcGisMapServerImageryProvider.fromUrl(
-            'https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer'
+            'https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer',
+            {
+              enablePickFeatures: false,
+            }
           )
 
         if (disposed || viewer.isDestroyed()) return
@@ -246,15 +240,16 @@ export default function Globe({
       } catch (error) {
         if (!disposed) {
           console.error('Satellite imagery error:', error)
+
+          setMessage(
+            'Satellite imagery could not be loaded. Reload to try again.'
+          )
         }
       }
     }
 
+    // Load a single imagery layer.
     void loadImagery()
-
-    // --------------------------------------------------
-    // Draw markers
-    // --------------------------------------------------
 
     function addMarkers(
       positions: Cartesian3[],
@@ -268,18 +263,12 @@ export default function Globe({
             color,
             outlineColor: Color.WHITE,
             outlineWidth: 2,
-            heightReference:
-              HeightReference.CLAMP_TO_GROUND,
-            disableDepthTestDistance:
-              Number.POSITIVE_INFINITY,
+            heightReference: HeightReference.CLAMP_TO_GROUND,
+            disableDepthTestDistance: Number.POSITIVE_INFINITY,
           },
         })
       }
     }
-
-    // --------------------------------------------------
-    // Render polygon while drawing
-    // --------------------------------------------------
 
     function renderDraft() {
       entities.removeAll()
@@ -307,7 +296,6 @@ export default function Globe({
           })
         }
 
-        // Live line from the last vertex to the cursor.
         if (vertices.length >= 1) {
           entities.add({
             polyline: {
@@ -340,7 +328,6 @@ export default function Globe({
         modeRef.current === 'rectangle' &&
         vertices.length === 1
       ) {
-        // Live rectangle outline as the mouse moves.
         entities.add({
           polyline: {
             positions: new CallbackProperty(() => {
@@ -369,10 +356,6 @@ export default function Globe({
       addMarkers(vertices, DRAW_COLOR)
     }
 
-    // --------------------------------------------------
-    // Render completed parcel
-    // --------------------------------------------------
-
     function renderCompleted(positions: Cartesian3[]) {
       entities.removeAll()
 
@@ -395,10 +378,6 @@ export default function Globe({
       addMarkers(positions, COMPLETE_COLOR)
     }
 
-    // --------------------------------------------------
-    // Finish selection
-    // --------------------------------------------------
-
     function finishWithPositions(positions: Cartesian3[]) {
       if (positions.length < 3) return
 
@@ -406,7 +385,6 @@ export default function Globe({
       hoverRef.current = null
 
       viewer.canvas.style.cursor = 'default'
-
       verticesRef.current = [...positions]
 
       setIsDrawing(false)
@@ -415,9 +393,9 @@ export default function Globe({
 
       renderCompleted(positions)
 
-      const parcel = createParcelGeoJSON(positions)
-
-      onParcelSelectRef.current(parcel)
+      onParcelSelectRef.current(
+        createParcelGeoJSON(positions)
+      )
 
       setMessage(
         `Parcel selected successfully (${positions.length} vertices).`
@@ -437,10 +415,6 @@ export default function Globe({
 
       finishWithPositions([...verticesRef.current])
     }
-
-    // --------------------------------------------------
-    // Start a new selection
-    // --------------------------------------------------
 
     function startDrawing(mode: DrawMode) {
       modeRef.current = mode
@@ -470,10 +444,6 @@ export default function Globe({
       }
     }
 
-    // --------------------------------------------------
-    // Undo last vertex
-    // --------------------------------------------------
-
     function undoLastPoint() {
       if (!drawingRef.current) return
 
@@ -492,10 +462,6 @@ export default function Globe({
         `${verticesRef.current.length} vertices remaining.`
       )
     }
-
-    // --------------------------------------------------
-    // Clear selection
-    // --------------------------------------------------
 
     function clearSelection() {
       drawingRef.current = false
@@ -523,20 +489,14 @@ export default function Globe({
       clear: clearSelection,
     }
 
-    // --------------------------------------------------
-    // Handle map clicks
-    // --------------------------------------------------
-
     let lastClickPosition: Cartesian2 | null = null
 
-    function handleMapClick(
-      screenPosition: Cartesian2
-    ) {
+    function handleMapClick(screenPosition: Cartesian2) {
       if (!drawingRef.current) return
 
       const worldPosition = viewer.camera.pickEllipsoid(
         screenPosition,
-        viewer.scene.globe.ellipsoid
+        globe.ellipsoid
       )
 
       if (!worldPosition) return
@@ -607,10 +567,6 @@ export default function Globe({
       ScreenSpaceEventType.LEFT_CLICK
     )
 
-    // --------------------------------------------------
-    // Double-click to complete a polygon
-    // --------------------------------------------------
-
     viewer.screenSpaceEventHandler.setInputAction(
       (event: { position: Cartesian2 }) => {
         if (
@@ -626,27 +582,20 @@ export default function Globe({
       ScreenSpaceEventType.LEFT_DOUBLE_CLICK
     )
 
-    // --------------------------------------------------
-    // Live mouse preview
-    // --------------------------------------------------
-
     viewer.screenSpaceEventHandler.setInputAction(
       (event: { endPosition: Cartesian2 }) => {
         if (!drawingRef.current) return
 
-        hoverRef.current = viewer.camera.pickEllipsoid(
-          event.endPosition,
-          viewer.scene.globe.ellipsoid
-        ) ?? null
+        hoverRef.current =
+          viewer.camera.pickEllipsoid(
+            event.endPosition,
+            globe.ellipsoid
+          ) ?? null
 
-        viewer.scene.requestRender()
+        scene.requestRender()
       },
       ScreenSpaceEventType.MOUSE_MOVE
     )
-
-    // --------------------------------------------------
-    // Keyboard shortcuts
-    // --------------------------------------------------
 
     function handleKeyDown(event: KeyboardEvent) {
       if (!drawingRef.current) return
@@ -686,10 +635,6 @@ export default function Globe({
 
     window.addEventListener('keydown', handleKeyDown)
 
-    // --------------------------------------------------
-    // Cleanup
-    // --------------------------------------------------
-
     return () => {
       disposed = true
 
@@ -707,10 +652,6 @@ export default function Globe({
       }
     }
   }, [])
-
-  // --------------------------------------------------
-  // Interface
-  // --------------------------------------------------
 
   return (
     <div
@@ -822,7 +763,8 @@ export default function Globe({
                 color: '#9eb5ce',
               }}
             >
-              Mode: {activeMode === 'polygon'
+              Mode:{' '}
+              {activeMode === 'polygon'
                 ? 'Custom Polygon'
                 : 'Quick Rectangle'}
               {' · '}
@@ -880,7 +822,7 @@ export default function Globe({
               fontWeight: 600,
             }}
           >
-            ✓ Parcel ready for analysis
+            Parcel ready for analysis
           </div>
         )}
 
