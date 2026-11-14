@@ -20,7 +20,8 @@ from scipy import ndimage as ndi
 from scipy.ndimage import uniform_filter
 from shapely.geometry import mapping, shape
 
-MODEL_DIR = Path(os.environ.get("MODEL_DIR", "."))
+DEFAULT_MODEL_DIR = Path(__file__).resolve().parents[2] / "Backend" / "sar_change_bundle"
+MODEL_DIR = Path(os.environ.get("MODEL_DIR", DEFAULT_MODEL_DIR))
 META = json.load(open(MODEL_DIR / "model_meta.json"))
 SESSION = ort.InferenceSession(str(MODEL_DIR / "model.onnx"),
                                providers=["CUDAExecutionProvider", "CPUExecutionProvider"])

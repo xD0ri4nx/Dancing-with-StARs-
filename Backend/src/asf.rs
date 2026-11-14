@@ -41,6 +41,8 @@ pub struct AsfClient {
 impl AsfClient {
     pub fn new(token: String, cache_dir: PathBuf) -> Result<Self> {
         std::fs::create_dir_all(&cache_dir)?;
+        // Absolute, so the inference service can open the files from any working directory.
+        let cache_dir = cache_dir.canonicalize()?;
         let http = reqwest::Client::builder()
             .redirect(reqwest::redirect::Policy::none())
             .build()?;
