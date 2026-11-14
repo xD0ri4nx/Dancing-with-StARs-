@@ -1,9 +1,48 @@
-@'
-node_modules/
-dist/
+# OS
+.DS_Store
+Thumbs.db
+
+# Editors
+.vscode/
+.idea/
+*.swp
+
+# Secrets
 .env
 .env.*
 !.env.example
-.venv/
+
+# Rust (Backend)
+Backend/target/
+**/*.rs.bk
+
+# Node / React (Frontend)
+node_modules/
+dist/
+dist-ssr/
+*.local
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Python / Colab (PipelineSar)
 __pycache__/
-'@ | Add-Content -Path .gitignore
+*.py[cod]
+.venv/
+venv/
+.ipynb_checkpoints/
+
+# ML models and data (too large for git; share via Drive/bucket)
+*.onnx
+*.pt
+*.pth
+*.safetensors
+*.npz
+*.npy
+*.tif
+*.tiff
+*.zip
+PipelineSar/raw/
+PipelineSar/outputs/
+PipelineSar/checkpoints/
