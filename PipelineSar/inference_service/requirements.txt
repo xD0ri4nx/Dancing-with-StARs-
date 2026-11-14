@@ -1,0 +1,8 @@
+fastapi
+uvicorn
+onnxruntime
+rasterio
+shapely
+scipy
+numpy
+pillow
