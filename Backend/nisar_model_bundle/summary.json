@@ -1,0 +1,134 @@
+[
+  {
+    "region": "galati",
+    "before": "2026-07-27T03:04:10+00:00",
+    "after": "2026-10-19T03:04:08+00:00",
+    "threshold_db": 3.0,
+    "valid_pixels": 553802,
+    "changed_pixels": 208358,
+    "changed_pct_valid": 37.62319384906519,
+    "source": "NISAR L2 GCOV",
+    "note": "Diferen\u021b\u0103 radar; nu identific\u0103 tipul schimb\u0103rii."
+  },
+  {
+    "region": "craiova",
+    "before": "2026-08-10T03:20:14+00:00",
+    "after": "2026-10-21T03:20:13+00:00",
+    "threshold_db": 3.0,
+    "valid_pixels": 567777,
+    "changed_pixels": 24659,
+    "changed_pct_valid": 4.343078356467416,
+    "source": "NISAR L2 GCOV",
+    "note": "Diferen\u021b\u0103 radar; nu identific\u0103 tipul schimb\u0103rii."
+  },
+  {
+    "region": "toulouse",
+    "before": "2026-10-23T18:59:56+00:00",
+    "after": "2026-11-04T18:59:56+00:00",
+    "threshold_db": 3.0,
+    "valid_pixels": 573915,
+    "changed_pixels": 3059,
+    "changed_pct_valid": 0.5330057586924893,
+    "source": "NISAR L2 GCOV",
+    "note": "Diferen\u021b\u0103 radar; nu identific\u0103 tipul schimb\u0103rii."
+  },
+  {
+    "region": "seville",
+    "before": "2026-10-25T19:18:50+00:00",
+    "after": "2026-11-06T19:18:51+00:00",
+    "threshold_db": 3.0,
+    "valid_pixels": 629607,
+    "changed_pixels": 7283,
+    "changed_pct_valid": 1.1567533397818004,
+    "source": "NISAR L2 GCOV",
+    "note": "Diferen\u021b\u0103 radar; nu identific\u0103 tipul schimb\u0103rii."
+  },
+  {
+    "region": "hamburg",
+    "before": "2026-10-21T18:40:25+00:00",
+    "after": "2026-11-02T18:40:26+00:00",
+    "threshold_db": 3.0,
+    "valid_pixels": 471791,
+    "changed_pixels": 14413,
+    "changed_pct_valid": 3.0549544183759334,
+    "source": "NISAR L2 GCOV",
+    "note": "Diferen\u021b\u0103 radar; nu identific\u0103 tipul schimb\u0103rii."
+  },
+  {
+    "region": "warsaw",
+    "before": "2026-10-22T17:59:23+00:00",
+    "after": "2026-11-03T17:59:23+00:00",
+    "threshold_db": 3.0,
+    "valid_pixels": 486257,
+    "changed_pixels": 4674,
+    "changed_pct_valid": 0.9612200955461824,
+    "source": "NISAR L2 GCOV",
+    "note": "Diferen\u021b\u0103 radar; nu identific\u0103 tipul schimb\u0103rii."
+  },
+  {
+    "region": "thessaloniki",
+    "before": "2026-07-26T17:29:31+00:00",
+    "after": "2026-10-18T17:29:30+00:00",
+    "threshold_db": 3.0,
+    "valid_pixels": 601111,
+    "changed_pixels": 11224,
+    "changed_pct_valid": 1.8672092175987463,
+    "source": "NISAR L2 GCOV",
+    "note": "Diferen\u021b\u0103 radar; nu identific\u0103 tipul schimb\u0103rii."
+  },
+  {
+    "region": "bologna",
+    "before": "2026-10-22T04:18:29+00:00",
+    "after": "2026-11-03T04:18:29+00:00",
+    "threshold_db": 3.0,
+    "valid_pixels": 565725,
+    "changed_pixels": 10606,
+    "changed_pct_valid": 1.8747624729329622,
+    "source": "NISAR L2 GCOV",
+    "note": "Diferen\u021b\u0103 radar; nu identific\u0103 tipul schimb\u0103rii."
+  },
+  {
+    "region": "budapest",
+    "before": "2026-10-22T18:00:31+00:00",
+    "after": "2026-11-03T18:00:32+00:00",
+    "threshold_db": 3.0,
+    "valid_pixels": 52879,
+    "changed_pixels": 137,
+    "changed_pct_valid": 0.259082055258231,
+    "source": "NISAR L2 GCOV",
+    "note": "Diferen\u021b\u0103 radar; nu identific\u0103 tipul schimb\u0103rii."
+  },
+  {
+    "region": "bordeaux",
+    "before": "2026-10-23T18:59:56+00:00",
+    "after": "2026-11-04T18:59:56+00:00",
+    "threshold_db": 3.0,
+    "valid_pixels": 69226,
+    "changed_pixels": 2872,
+    "changed_pct_valid": 4.1487302458613815,
+    "source": "NISAR L2 GCOV",
+    "note": "Diferen\u021b\u0103 radar; nu identific\u0103 tipul schimb\u0103rii."
+  },
+  {
+    "region": "milan",
+    "before": "2026-10-22T04:19:00+00:00",
+    "after": "2026-11-03T04:19:01+00:00",
+    "threshold_db": 3.0,
+    "valid_pixels": 2223552,
+    "changed_pixels": 62167,
+    "changed_pct_valid": 2.795841968166249,
+    "source": "NISAR L2 GCOV",
+    "note": "Diferen\u021b\u0103 radar; nu identific\u0103 tipul schimb\u0103rii."
+  },
+  {
+    "region": "london",
+    "before": "2026-10-24T04:37:24+00:00",
+    "after": "2026-11-05T04:37:25+00:00",
+    "threshold_db": 3.0,
+    "valid_pixels": 269681,
+    "changed_pixels": 656,
+    "changed_pct_valid": 0.2432503587571983,
+    "source": "NISAR L2 GCOV",
+    "note": "Diferen\u021b\u0103 radar; nu identific\u0103 tipul schimb\u0103rii."
+  }
+]

@@ -15,7 +15,7 @@ use crate::jobs::{Job, Status};
 
 #[derive(OpenApi)]
 #[openapi(
-    info(title = "SAR Change Detection API", description = "Sentinel-1 (OPERA RTC-S1) change detection over a user-drawn parcel."),
+    info(title = "SAR Change Detection API", description = "Experimental NISAR GCOV change detection over a user-drawn parcel."),
     paths(health, analyze, get_job),
     components(schemas(AnalyzeRequest, AnalyzeResponse, Job, Status, AnalysisResult, Polygon, ErrorBody))
 )]
@@ -94,16 +94,8 @@ async fn get_job(State(state): State<AppState>, Path(id): Path<Uuid>) -> Result<
 async fn run_job(state: AppState, id: Uuid, req: AnalyzeRequest) {
     let jobs = state.jobs.clone();
     let step = async {
-        jobs.update(id, Status::Searching, "searching NASA ASF for SAR scenes").await;
-        let (s1, s2) = state.asf.find_pair(&req.polygon, &req.start_date, &req.end_date).await?;
-
-        jobs.update(id, Status::Downloading, format!("downloading scene {}", s1.date)).await;
-        let t1 = state.asf.download_scene(&s1).await?;
-        jobs.update(id, Status::Downloading, format!("downloading scene {}", s2.date)).await;
-        let t2 = state.asf.download_scene(&s2).await?;
-
-        jobs.update(id, Status::Running, format!("running change detection {} → {}", s1.date, s2.date)).await;
-        state.inference.predict(&req.polygon, &req.analysis_type, &t1, &t2).await
+        jobs.update(id, Status::Searching, "Searching NISAR and processing data; large downloads may take time").await;
+        state.inference.analyze_nisar(&req.polygon, &req.start_date, &req.end_date, &req.analysis_type).await
     };
 
     match step.await {

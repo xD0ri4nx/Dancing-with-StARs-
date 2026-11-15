@@ -1,0 +1,75 @@
+{
+  "model": "SiameseUNet",
+  "source": "NISAR L2 GCOV frequencyA",
+  "channels": [
+    "HH",
+    "HV"
+  ],
+  "datasets": [
+    "HHHH",
+    "HVHV"
+  ],
+  "inputs": [
+    "t1",
+    "t2"
+  ],
+  "output": "change_prob",
+  "sigmoid_applied": true,
+  "spatial_multiple": 4,
+  "threshold": 0.5,
+  "label_threshold_db": 3.0,
+  "preprocessing": {
+    "filter": "5x5 valid-weighted mean in linear power, jointly valid pixels",
+    "to_db": "10*log10(max(x,1e-8))",
+    "normalize": {
+      "HH": {
+        "db_min": -25,
+        "db_max": 0
+      },
+      "HV": {
+        "db_min": -32,
+        "db_max": -5
+      }
+    }
+  },
+  "split_regions": {
+    "train": [
+      "bologna",
+      "craiova",
+      "galati",
+      "hamburg",
+      "seville",
+      "thessaloniki",
+      "toulouse",
+      "warsaw"
+    ],
+    "val": [
+      "budapest"
+    ],
+    "test": [
+      "london",
+      "milan"
+    ]
+  },
+  "validation": {
+    "loss": 0.004950202070176601,
+    "precision": 0.0,
+    "recall": 0.0,
+    "f1": 0.0,
+    "iou": 0.0,
+    "tp": 0,
+    "fp": 0,
+    "fn": 32
+  },
+  "test": {
+    "loss": 0.05132700800895691,
+    "precision": 0.8528298151401915,
+    "recall": 0.5508015407483178,
+    "f1": 0.6693210068365444,
+    "iou": 0.5029920892080451,
+    "tp": 34462,
+    "fp": 5947,
+    "fn": 28105
+  },
+  "warning": "Pseudo-labels, no event identification; requires a NISAR-compatible inference service."
+}

@@ -46,6 +46,13 @@ impl InferenceClient {
         Self { http: reqwest::Client::new(), base_url }
     }
 
+    pub async fn analyze_nisar(&self, polygon: &Polygon, start: &str, end: &str, analysis_type: &str) -> Result<AnalysisResult> {
+        let body = serde_json::json!({"polygon": polygon, "start_date": start, "end_date": end, "analysis_type": analysis_type});
+        let resp = self.http.post(format!("{}/analyze", self.base_url)).json(&body).send().await.context("NISAR inference service unreachable")?;
+        if !resp.status().is_success() { bail!("NISAR inference service error {}: {}", resp.status(), resp.text().await.unwrap_or_default()); }
+        Ok(resp.json().await?)
+    }
+
     pub async fn predict(
         &self,
         polygon: &Polygon,
