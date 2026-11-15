@@ -144,11 +144,11 @@ export default function App() {
   const [showChanges, setShowChanges] =
     useState(true)
 
-  const [startDate, setStartDate] =
-    useState('2024-07-01')
+const [startDate, setStartDate] =
+  useState('2026-07-01')
 
-  const [endDate, setEndDate] =
-    useState('2024-11-30')
+const [endDate, setEndDate] =
+  useState('2026-10-25')
 
   const [visibleRegions, setVisibleRegions] =
     useState(30)
