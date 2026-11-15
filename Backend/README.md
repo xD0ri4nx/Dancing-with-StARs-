@@ -65,9 +65,12 @@ Oprire: `Ctrl + C`.
 | Job-ul dă `inference service unreachable` | Normal dacă nu rulează serviciul Python (vezi mai jos). Restul API-ului merge |
 | Windows Firewall întreabă | Permite accesul |
 
-## Serviciul de inferență (opțional, doar pentru rezultate reale)
+## Serviciul de inferență (pentru rezultate reale)
 
-Backend-ul trimite imaginile unui serviciu Python care rulează modelul. Fără el, job-ul se oprește la pasul `running`.
+Backend-ul trimite imaginile unui serviciu Python care rulează modelul antrenat. Fără el, job-ul se oprește la pasul `running` cu `inference service unreachable`.
+
+1. Modelul: pune folderul `sar_change_bundle` (de la echipa Colab, conține `model.onnx` + `model_meta.json`) în `Backend/`. Nu e pe git, cere-l pe Drive.
+2. Într-un **al doilea terminal**, din rădăcina repo-ului:
 
 ```bash
 cd PipelineSar/inference_service
@@ -75,7 +78,7 @@ pip install -r requirements.txt
 uvicorn app:app --port 8000
 ```
 
-Are nevoie de `model.onnx` și `model_meta.json` (de la echipa Colab) în același folder, sau indică folderul cu `MODEL_DIR=...`.
+Verificare: http://localhost:8000/health trebuie să arate `"model": "SiameseUNet"`. Dacă bundle-ul e în alt loc: `MODEL_DIR=/calea/catre/bundle uvicorn app:app --port 8000`.
 
 ## API (pentru frontend)
 
