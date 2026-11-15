@@ -6,3 +6,5 @@ shapely
 scipy
 numpy
 pillow
+h5py
+asf_search
